@@ -24,6 +24,14 @@
         "bxlogin-api-endpoint": {
             "description": "Bluemix Login API endpoint",
             "type": "string"
+        },
+        "bxuser": {
+            "description": "Bluemix Username (Email or IBMid)",
+            "type": "string"
+        },
+        "bxpass": {
+            "description": "Bluemix Password",
+            "type": "password "
         }
     },
     "required": [
@@ -31,7 +39,9 @@
         "deploy-org",
         "deploy-space",
         "bxlogin-api-endpoint",
-        "openwhisk-api-endpoint"
+        "openwhisk-api-endpoint",
+        "bxuser",
+        "bxpass"
     ],
     "form": [
         {
@@ -49,6 +59,18 @@
             "readonly": false,
             "title": "Bluemix Login API Endpoint",
             "key": "bxlogin-api-endpoint"
+        },
+        {
+            "type": "text",
+            "readonly": false,
+            "title": "Bluemix Username (Email or IBMid)",
+            "key": "bxuser"
+        },
+        {
+            "type": "password",
+            "readonly": false,
+            "title": "Bluemix Password",
+            "key": "bxpass"
         },
         {
             "type": "table",
