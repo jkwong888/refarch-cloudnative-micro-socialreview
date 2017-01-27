@@ -29,7 +29,9 @@ pipeline-micro-socialreview:
        SPACE: "{{deploy.parameters.deploy-space}}"
        NAME: "{{pipeline-micro-socialreview.parameters.name}}-{{deploy.parameters.deploy-space}}"
        OPENWHISK_API_ENDPOINT: "{{deploy.parameters.openwhisk-api-endpoint}}"
-       OPENWHISK_AUTH_KEY: "{{deploy.parameters.openwhisk-auth-key}}"
+       BXLOGIN_API_ENDPOINT: "{{deploy.parameters.bxlogin-api-endpoint}}"
+       BXUSER: "{{deploy.parameters.bxuser}}"
+       BXPASS: "{{deploy.parameters.bxpass}}"
       execute: false
 
 deploy:
@@ -40,4 +42,6 @@ deploy:
     deploy-org: "{{organization}}"
     deploy-space: "{{space}}"
     openwhisk-api-endpoint: "openwhisk.ng.bluemix.net"
-    openwhisk-auth-key: ""
+    bxlogin-api-endpoint: "login.ng.bluemix.net"
+    bxuser: ""
+    bxpass: ""

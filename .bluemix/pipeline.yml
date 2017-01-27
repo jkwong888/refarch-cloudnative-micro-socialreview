@@ -12,8 +12,14 @@ stages:
   - name: OPENWHISK_API_ENDPOINT
     value: ${OPENWHISK_API_ENDPOINT}
     type: text
-  - name: OPENWHISK_AUTH_KEY
-    value: ${OPENWHISK_AUTH_KEY}
+  - name: BXLOGIN_API_ENDPOINT
+    value: ${BXLOGIN_API_ENDPOINT}
+    type: text
+  - name: BXUSER
+    value: ${BXUSER}
+    type: text
+  - name: BXPASS
+    value: ${BXPASS}
     type: secure
   jobs:
   - name: Deploy
@@ -27,14 +33,11 @@ stages:
       #!/bin/bash
 
       set -x
-      # download openwhisk cli
-      if [ ! -f ./wsk ]; then
-          wget https://openwhisk.ng.bluemix.net/cli/go/download/linux/amd64/wsk
-          chmod u+x wsk
-      fi
 
-      # set up openwhisk cli
-      ./wsk property set --apihost ${OPENWHISK_API_ENDPOINT} --auth ${OPENWHISK_AUTH_KEY}
+      echo "Bluemix Login Target: https://$BXLOGIN_API_ENDPOINT"
+      echo "OpenWhisk Target: https://$OPENWHISK_API_ENDPOINT"
+      namespace=${CF_ORG}_${CF_SPACE}
+      echo "namespace: $namespace"
 
       # download jq
       if [ ! -f ./jq ]; then
@@ -42,6 +45,25 @@ stages:
           mv jq-linux64 jq
           chmod u+x jq
       fi
+
+      # payload for openwhisk api
+      echo -e "\nprepare payload to request openwhisk cli authkey..."
+      payload=$(curl -XPOST -H "Accept: application/json" -H "Authorization: Basic Y2Y6" -H "Content-Type: application/x-www-form-urlencoded" -d "response_type=token&grant_type=password&username=${BXUSER}&password=${BXPASS}" "https://${BXLOGIN_API_ENDPOINT}/UAALoginServerWAR/oauth/token" | ./jq '{"accessToken": .access_token, "refreshToken": .refresh_token}')
+
+      # get openwhisk authkey
+      echo -e "\nrequest openwhisk cli authkey..."
+      auth_key=$(curl -XPOST -H "Accept: application/json" -H "Content-Type: application/json" -d "${payload}" "https://${OPENWHISK_API_ENDPOINT}/bluemix/v1/authenticate" | ./jq --arg namespace "${namespace}" '.namespaces[] | select(.name == $namespace) | [.uuid,":",.key] | add' | sed -e 's/"//g')
+      echo -e "\nwsk-authkey= $auth_key"
+
+      # setup openwhisk cli
+      echo -e "\ndownload and configure openwhisk cli..."
+      curl https://${OPENWHISK_API_ENDPOINT}/cli/go/download/linux/amd64/wsk -o wsk
+      chmod u+x wsk
+      ./wsk property set --apihost ${OPENWHISK_API_ENDPOINT} --auth $auth_key
+      ./wsk property unset --namespace
+      ./wsk property get
+      ./wsk action invoke /whisk.system/utils/echo -p message hello --blocking --result
+      [ $? -eq 0 ] && echo "OpenWhisk CLI is successfully configured." || { echo "Failed to setup OpenWhisk CLI. Exit with error."; exit 1; }
 
       # get cloudant credentials
       cloudant_svc=`cf services | grep cloudantNoSQLDB | sed -e 's/cloudantNoSQLDB.*$//g' -e 's/\s//g'`

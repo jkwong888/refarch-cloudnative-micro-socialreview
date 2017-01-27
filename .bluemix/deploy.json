@@ -21,16 +21,16 @@
             "description": "OpenWhisk API endpoint",
             "type": "string"
         },
-        "openwhisk-auth-key": {
-            "description": "OpenWhisk authorization key: copy the authorization key from https://console.ng.bluemix.net/openwhisk/learn/cli",
-            "type": "password"
+        "bxlogin-api-endpoint": {
+            "description": "Bluemix Login API endpoint",
+            "type": "string"
         }
     },
     "required": [
         "deploy-region",
         "deploy-org",
         "deploy-space",
-        "openwhisk-auth-key",
+        "bxlogin-api-endpoint",
         "openwhisk-api-endpoint"
     ],
     "form": [
@@ -47,8 +47,8 @@
         {
             "type": "text",
             "readonly": false,
-            "title": "OpenWhisk Auth Key",
-            "key": "openwhisk-auth-key"
+            "title": "Bluemix Login API Endpoint",
+            "key": "bxlogin-api-endpoint"
         },
         {
             "type": "table",
